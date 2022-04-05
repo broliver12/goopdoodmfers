@@ -1,13 +1,13 @@
 # GOOPDOODMFERS
 
 Solidity code for goopdoodmfers NFT collection.
-8000 goopdoodmfers.
 
 Fan Art, not affiliated with goopdoods or mfers.
-Permission to create derivateive collection granted by creators
-of both goopdoods & mfers, 2022.
 
-### Usage
+Permission to create derivative collection granted by creators
+of both goopdoods & mfers, April 2022.
+
+## Usage
 
 #### Setup
 
@@ -31,12 +31,14 @@ of both goopdoods & mfers, 2022.
 
 `npm run test`
 
-### Contact
+## Contact
 
 Author, Owner: Oliver Straszynski
+
 Email: oliver.strasz@gmail.com
 
-### License
+## License
 
 UNLICENSED
+
 DO NOT USE OR REPRODUCE WITHOUT AUTHORIZATION
