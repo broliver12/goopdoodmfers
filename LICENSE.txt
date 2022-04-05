@@ -1,0 +1,9 @@
+Copyright (C) 2022 Oliver Straszynski
+
+This repository is part of the goopdoodmfers Project.
+
+No part of this repository can be copied, distributed, reproduced,
+or sold without the express written and signed permission of:
+
+Oliver Straszynski
+<oliver.strasz@gmail.com>
