@@ -78,5 +78,10 @@ describe('', () => {
               8,
           )
         })
+
+        it(REVERT_TAG + 'Attempting to fetch out of owner index reverts', async () => {
+          await contract.connect(addr1).mint(addr1.getAddress(), 1)
+          expect(await contract.tokenOfOwnerByIndex(addr1.getAddress(), 1))
+        })
     })
 })

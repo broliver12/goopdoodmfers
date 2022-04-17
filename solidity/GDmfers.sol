@@ -20,7 +20,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 error OwnerIndexOutOfBounds();
 
-contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
+contract GDmfers is ERC721A, Ownable, ReentrancyGuard {
     // Metadata Control
     bool private revealed;
     string private baseURI;
@@ -41,6 +41,9 @@ contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
     uint256 public immutable devSupply;
     // Map of wallets => slot counts
     mapping(address => uint256) public whitelist;
+    mapping(address => uint256) public freeMintsUsed;
+
+    IERC721 goopdoods = IERC721(0x14CB8990Ee514662297018e4cEa5a2e91a018d84);
 
     // Constructor
     constructor() ERC721A("goopdoodmfers", "goopdoodmfers") {
@@ -73,11 +76,26 @@ contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
         enoughSupply(quantity)
     {
         require(whitelistEnabled, "Whitelist sale not enabled");
-        require(msg.value >= quantity * price, "Not enough ETH");
         require(whitelist[msg.sender] >= quantity, "No whitelist mints left");
+        if(goopdoods.balanceOf(msg.sender) > 0){
+           uint256 freeMintsAvailable = goopdoods.balanceOf(msg.sender) - freeMintsUsed[msg.sender];
+           if(quantity >= freeMintsAvailable){
+             freeMintsUsed[msg.sender] += freeMintsAvailable;
+             // If you've got some free mints, you'll pay partial price
+             require(msg.value >= (quantity - freeMintsAvailable) * price, "Not enough ETH");
+             refundIfOver((quantity - freeMintsAvailable) * price);
+           } else {
+             freeMintsUsed[msg.sender] += quantity;
+             // If you've got enough free mints, all eth paid is refunded.
+             refundIfOver(0);
+           }
+        } else {
+          // If you're not a goop owner, you pay full price
+          require(msg.value >= quantity * price, "Not enough ETH");
+          refundIfOver(quantity * price);
+        }
         whitelist[msg.sender] = whitelist[msg.sender] - quantity;
         _safeMint(msg.sender, quantity);
-        refundIfOver(quantity * price);
     }
 
     // Mint function for public sale
@@ -93,9 +111,24 @@ contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
             numberMinted(msg.sender) + quantity <= maxMints,
             "Cant mint that many"
         );
-        require(msg.value >= quantity * price, "Not enough ETH");
+        if(goopdoods.balanceOf(msg.sender) > 0){
+           uint256 freeMintsAvailable = goopdoods.balanceOf(msg.sender) - freeMintsUsed[msg.sender];
+           if(quantity >= freeMintsAvailable){
+             freeMintsUsed[msg.sender] += freeMintsAvailable;
+             // If you've got some free mints, you'll pay partial price
+             require(msg.value >= (quantity - freeMintsAvailable) * price, "Not enough ETH");
+             refundIfOver((quantity - freeMintsAvailable) * price);
+           } else {
+             freeMintsUsed[msg.sender] += quantity;
+             // If you've got enough free mints, all eth paid is refunded.
+             refundIfOver(0);
+           }
+        } else {
+          // If you're not a goop owner, you pay full price
+          require(msg.value >= quantity * price, "Not enough ETH");
+          refundIfOver(quantity * price);
+        }
         _safeMint(msg.sender, quantity);
-        refundIfOver(quantity * price);
     }
 
     // Mint function for developers (owner)

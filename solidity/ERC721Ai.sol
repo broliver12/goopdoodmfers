@@ -2,15 +2,16 @@
 
 /**************************************************************************
     - Extend ERC721A
-    - Re-add tokenOfOwnerByIndex()
-    - Re-add necessary errors.
+    - Re-add tokenOfOwnerByIndex() function
+    - Re-add OwnerIndexOutOfBounds() error
 
     Add ability to index the collection and find all NFT owned
     by a given wallet.
 
-    Although read only, this implementation is by nature NOT efficient,
-    and degrades with collection size. Typically, you shouldn't call
-    tokenOfOwnerByIndex() from another contract.
+    While invaluable when called from a read-only context, this function's
+    implementation is by nature NOT efficient, and degrades with collection
+    size. Therefore, you typically shouldn't call tokenOfOwnerByIndex() from
+    another contract.
 
     Written by Oliver Straszynski:
     https://github.com/broliver12/
@@ -25,20 +26,20 @@ error OwnerIndexOutOfBounds();
 /**
  * @dev Extension of [ERC721A] by Chiru Labs.
  **/
-contract ERC721A_indexExt is ERC721A {
-    constructor(string memory name_, string memory symbol_)
-        ERC721A(name_, symbol_)
-    {}
+contract ERC721Ai is ERC721A {
+    constructor(
+      string memory name_,
+      string memory symbol_
+    ) ERC721A(name_, symbol_) {}
 
     /**
-     * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
      * This read function is O(totalSupply).
      * If calling from a separate contract, be sure to test gas first.
      * It may also degrade with extremely large collection sizes,
      * (e.g >> 10000), test for your use case.
      */
     function tokenOfOwnerByIndex(address owner, uint256 index)
-        public
+        external
         view
         returns (uint256)
     {
