@@ -3,9 +3,10 @@
 Solidity code for goopdoodmfers NFT collection.
 8008 goopdoodmfers.
 
+Permission to create derivative collection granted by creators
+of both goopdoods & mfers, April 2022.
+
 Fan Art, not affiliated with goopdoods or mfers.
-Permission to create derivateive collection granted by creators
-of both goopdoods & mfers, 2022.
 
 ## View Contract on the Ethereum Mainnet
 
@@ -27,25 +28,32 @@ TLDR:
 
 #### Setup
 
-`// Clone repository, navigate to root directory (/goopdoodmfers)`
-`npm run setup`
-`// Set account private key, etherscan key, RPC URLs in ./env/secrets.json`
-`npm run rebuild`
+    // Clone repository, navigate to root directory (/goopdoodmfers)
+    git clone https://github.com/broliver12/goopdoodmfers.git
+    
+    // Install necessary dependencies
+    npm run setup
+    
+    // Set account private key, etherscan key, RPC URLs in ./env/secrets.json
+    
+    // Compile project
+    npm run rebuild
 
 #### Deploy
 
-`npm run deploy`
-`// Follow deploy script prompts`
-`// Wait for deployment success`
+    npm run deploy
+    // Follow deploy script prompts
+    // Wait for deployment success
 
 #### Verify
 
-`npm run verify "networkName" "deployedContractAddress"`
-`// Wait for verification success`
+    npm run verify `networkName` `deployedContractAddress`
+    // Wait for verification success
 
 #### Testing
 
-`npm run test`
+    npm run test
+    // See test results
 
 ## Contact
 
