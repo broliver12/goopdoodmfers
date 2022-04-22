@@ -8,7 +8,13 @@ const acc = [`0x${secret.METAMASK_WALLET_PRIVATE_KEY}`];
 // Available Solidity compiler versions
 const pragmas = [
   {
-    version : "0.8.4"
+    version : "0.8.4",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
   },
 ];
 
@@ -26,6 +32,13 @@ const nw = {
     currency: currencies.ether,
     mainnet: true
   },
+  ropsten: {
+    url: secret.ROPSTEN_NODE_URL,
+    chainId: 3,
+    accounts: acc,
+    currency: currencies.ether,
+    mainnet: false
+  },
   rinkeby: {
     url: secret.RINKEBY_NODE_URL,
     chainId: 4,
@@ -38,19 +51,13 @@ const nw = {
 // Use this to keep track of which networks use which scan key
 const scanKeys = {
   homestead: secret.ETHERSCAN_API_KEY,
-  rinkeby: secret.ETHERSCAN_API_KEY,
+  rinkeby: secret.ETHERSCAN_API_KEY
 };
 
 // Hardhat config exports
 module.exports = {
   solidity: {
-    compilers : pragmas,
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200
-      }
-    }
+    compilers : pragmas
   },
   paths: {
     sources: "./solidity",

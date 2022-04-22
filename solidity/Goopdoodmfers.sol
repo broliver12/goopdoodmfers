@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.2
-// Chiru Labs ERC721 v3.1.0
+// OpenZeppelin Contracts v4.4.1
+// Chiru Labs ERC721 v3.2.0
 
 /****************************************************************************
     goopdoodmfers
 
-    8000 Supply
+    8008 Supply
 
     Written by Oliver Straszynski
     https://github.com/broliver12/
@@ -13,41 +13,51 @@
 
 pragma solidity ^0.8.4;
 
-import "./ERC721A_indexExt.sol";
+import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract Goopdoodmfers is Ownable, ERC721A_indexExt, ReentrancyGuard {
-    // Control Params
+error OwnerIndexOutOfBounds();
+
+contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
+    // Metadata Control
     bool private revealed;
     string private baseURI;
     string private notRevealedURI;
-    string private baseExtension = ".json";
+    string private ext = ".json";
+    // Mint Control
     bool public whitelistEnabled;
-    bool public publicMintEnabled;
-    uint256 public immutable totalDevSupply;
-    uint256 public immutable totalCollectionSize;
-
-    // Mint Limits
+    bool public mintEnabled;
     uint256 public maxMintsWhitelist = 2;
     uint256 public maxMints = 20;
-
     // Price
-    uint256 public unitPrice = 0.01 ether;
-
-    // Supply for devs (< 0.1% of total)
-    uint256 private remainingDevSupply = 7;
-
+    uint256 public price = 0.018 ether;
+    // Collection Size
+    // Set to 8008 on ln. 58
+    uint256 public immutable collectionSize;
+    // Supply for devs
+    uint256 private remainingDevSupply = 14;
+    uint256 public immutable devSupply;
     // Map of wallets => slot counts
     mapping(address => uint256) public whitelist;
+    mapping(address => uint256) public freeMintsUsed;
+
+    // Goopdoods contract
+    address private allowedAddress = 0x2dfF22dcb59D6729Ed543188033CE102f14eF0d1;
+    IERC721 goopdoods = IERC721(allowedAddress);
+    // Ability to change address
+    function setAllowedAddress(address _addr) external onlyOwner {
+        allowedAddress = _addr;
+        goopdoods = IERC721(_addr);
+    }
 
     // Constructor
-    constructor() ERC721A_indexExt("goopdoodmfers", "goopdoodmfers") {
+    constructor() ERC721A("goopdoodmfers", "goopdoodmfers") {
         // Set collection size
-        totalCollectionSize = 8000;
-        // Set dev supply
-        totalDevSupply = remainingDevSupply;
+        collectionSize = 8008;
+        // Make dev supply public & immutable
+        devSupply = remainingDevSupply;
     }
 
     // Ensure caller is a wallet
@@ -59,15 +69,13 @@ contract Goopdoodmfers is Ownable, ERC721A_indexExt, ReentrancyGuard {
     // Ensure there's enough supply to mint the quantity
     modifier enoughSupply(uint256 quantity) {
         require(
-            totalSupply() + quantity <= totalCollectionSize,
+            totalSupply() + quantity <= collectionSize,
             "reached max supply"
         );
         _;
     }
 
     // Mint function for whitelist sale
-    // Requires minimum ETH value of unitPrice * quantity
-    // Caller must be whitelisted to use this function
     function whitelistMint(uint256 quantity)
         external
         payable
@@ -75,39 +83,57 @@ contract Goopdoodmfers is Ownable, ERC721A_indexExt, ReentrancyGuard {
         enoughSupply(quantity)
     {
         require(whitelistEnabled, "Whitelist sale not enabled");
-        require(msg.value >= quantity * unitPrice, "Not enough ETH");
         require(whitelist[msg.sender] >= quantity, "No whitelist mints left");
+        discount(quantity);
         whitelist[msg.sender] = whitelist[msg.sender] - quantity;
         _safeMint(msg.sender, quantity);
-        refundIfOver(quantity * unitPrice);
     }
 
     // Mint function for public sale
-    // Requires minimum ETH value of unitPrice * quantity
     function publicMint(uint256 quantity)
         external
         payable
         isWallet
         enoughSupply(quantity)
     {
-        require(publicMintEnabled, "Minting not enabled");
-        require(quantity <= maxMints, "Illegal quantity");
+        require(mintEnabled, "Minting not enabled");
         require(
             numberMinted(msg.sender) + quantity <= maxMints,
             "Cant mint that many"
         );
-        require(msg.value >= quantity * unitPrice, "Not enough ETH");
+        discount(quantity);
         _safeMint(msg.sender, quantity);
-        refundIfOver(quantity * unitPrice);
+    }
+
+    // 1 goop == 1 gdmfer
+    function discount(uint256 quantity) private {
+        uint256 balance = goopdoods.balanceOf(msg.sender);
+        if(balance > 0){
+           uint256 freeMintsAvailable = balance - freeMintsUsed[msg.sender];
+           if(quantity >= freeMintsAvailable){
+             freeMintsUsed[msg.sender] += freeMintsAvailable;
+             // If you've got some free mints, you'll pay partial price
+             require(msg.value >= (quantity - freeMintsAvailable) * price, "Not enough ETH");
+             refundIfOver((quantity - freeMintsAvailable) * price);
+           } else {
+             freeMintsUsed[msg.sender] += quantity;
+             // If you've got enough free mints, all eth paid is refunded.
+             refundIfOver(0);
+           }
+        } else {
+          // If you're not a goop owner, you pay full price
+          require(msg.value >= quantity * price, "Not enough ETH");
+          refundIfOver(quantity * price);
+        }
     }
 
     // Mint function for developers (owner)
-    function devMint(uint256 quantity, address recipient)
+    function devMint(address recipient, uint256 quantity)
         external
         onlyOwner
         enoughSupply(quantity)
     {
-        require(remainingDevSupply - quantity >= 0, "Not enough dev supply");
+        require(quantity <= remainingDevSupply, "Not enough dev supply");
         require(quantity <= maxMints, "Illegal quantity");
         remainingDevSupply = remainingDevSupply - quantity;
         _safeMint(recipient, quantity);
@@ -131,7 +157,7 @@ contract Goopdoodmfers is Ownable, ERC721A_indexExt, ReentrancyGuard {
                     abi.encodePacked(
                         baseURI,
                         Strings.toString(tokenId),
-                        baseExtension
+                        ext
                     )
                 )
                 : "";
@@ -139,29 +165,28 @@ contract Goopdoodmfers is Ownable, ERC721A_indexExt, ReentrancyGuard {
 
     // Set price for whitelist & public mint
     function setPrice(uint256 _price) external onlyOwner {
-        unitPrice = _price;
+        price = _price;
     }
 
     // Change base metadata URI
-    // Only will be called if something fatal happens to initial base URI
-    function setBaseURI(string calldata _baseURI) external onlyOwner {
-        baseURI = _baseURI;
-    }
-
-    // Only will be called if something fatal happens to initial base URI
-    function setBaseExtension(string calldata _baseExtension)
-        external
-        onlyOwner
-    {
-        baseExtension = _baseExtension;
+    function setBaseURI(string calldata _uri) external onlyOwner {
+        baseURI = _uri;
     }
 
     // Change pre-reveal metadata URI
-    function setNotRevealedURI(string calldata _notRevealedURI)
+    function setNotRevealedURI(string calldata _uri)
         external
         onlyOwner
     {
-        notRevealedURI = _notRevealedURI;
+        notRevealedURI = _uri;
+    }
+
+    // Change baseURI extension
+    function setExt(string calldata _ext)
+        external
+        onlyOwner
+    {
+        ext = _ext;
     }
 
     // Set the mint state
@@ -172,10 +197,10 @@ contract Goopdoodmfers is Ownable, ERC721A_indexExt, ReentrancyGuard {
         if (_state == 1) {
             whitelistEnabled = true;
         } else if (_state == 2) {
-            publicMintEnabled = true;
+            mintEnabled = true;
         } else {
             whitelistEnabled = false;
-            publicMintEnabled = false;
+            mintEnabled = false;
         }
     }
 
@@ -192,8 +217,8 @@ contract Goopdoodmfers is Ownable, ERC721A_indexExt, ReentrancyGuard {
     }
 
     // Returns the amount the address has minted
-    function numberMinted(address minterAddr) public view returns (uint256) {
-        return _numberMinted(minterAddr);
+    function numberMinted(address addr) public view returns (uint256) {
+        return _numberMinted(addr);
     }
 
     // Returns the ownership data for the given tokenId
@@ -212,9 +237,47 @@ contract Goopdoodmfers is Ownable, ERC721A_indexExt, ReentrancyGuard {
     }
 
     // Refunds extra ETH if minter sends too much
-    function refundIfOver(uint256 price) private {
-        if (msg.value > price) {
-            payable(msg.sender).transfer(msg.value - price);
+    function refundIfOver(uint256 _price) private {
+        if (msg.value > _price) {
+            payable(msg.sender).transfer(msg.value - _price);
         }
+    }
+
+    // While invaluable when called from a read-only context, this function's
+    // implementation is by nature NOT gas efficient [O(totalSupply)],
+    // and degrades with collection size.
+    //
+    // Therefore, you typically shouldn't call tokenOfOwnerByIndex() from
+    // another contract. Test for your use case.
+    function tokenOfOwnerByIndex(address owner, uint256 index)
+        external
+        view
+        returns (uint256)
+    {
+        if (index >= balanceOf(owner)) revert OwnerIndexOutOfBounds();
+        uint256 numMintedSoFar = _currentIndex;
+        uint256 tokenIdsIdx;
+        address currOwnershipAddr;
+
+        unchecked {
+            for (uint256 i; i < numMintedSoFar; i++) {
+                TokenOwnership memory ownership = _ownerships[i];
+                if (ownership.burned) {
+                    continue;
+                }
+                if (ownership.addr != address(0)) {
+                    currOwnershipAddr = ownership.addr;
+                }
+                if (currOwnershipAddr == owner) {
+                    if (tokenIdsIdx == index) {
+                        return i;
+                    }
+                    tokenIdsIdx++;
+                }
+            }
+        }
+
+        // Cant get to this line, because maths
+        revert();
     }
 }
