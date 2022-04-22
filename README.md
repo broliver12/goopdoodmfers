@@ -38,5 +38,5 @@ Email: oliver.strasz@gmail.com
 
 ### License
 
-UNLICENSED
-DO NOT USE OR REPRODUCE WITHOUT AUTHORIZATION
+MIT
+_Happy Hacking_
