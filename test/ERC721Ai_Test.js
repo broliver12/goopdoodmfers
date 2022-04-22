@@ -7,7 +7,7 @@ const fs = require('fs')
 
 describe('', () => {
     // Set these to the contract's name, and path relative to [basePath]
-    const CONTRACT_NAME = 'ERC721A_mint'
+    const CONTRACT_NAME = 'Goopdoodmfers'
     const CONTRACT_PATH = 'mock'
     let factory, contract, owner, addr1, addr2
     let addrs
@@ -68,13 +68,13 @@ describe('', () => {
           expect(await contract.tokenOfOwnerByIndex(addr2.getAddress(), 2)).to.equal(
               7,
           )
-          expect(await contract.tokenOfOwnerByIndex(addr1.getAddress(), 0)).to.equal(
+          expect(await contract.tokenOfOwnerByIndex(owner.getAddress(), 0)).to.equal(
               2,
           )
-          expect(await contract.tokenOfOwnerByIndex(addr1.getAddress(), 1)).to.equal(
+          expect(await contract.tokenOfOwnerByIndex(owner.getAddress(), 1)).to.equal(
               5,
           )
-          expect(await contract.tokenOfOwnerByIndex(addr1.getAddress(), 2)).to.equal(
+          expect(await contract.tokenOfOwnerByIndex(owner.getAddress(), 2)).to.equal(
               8,
           )
         })

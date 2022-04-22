@@ -32,6 +32,13 @@ const nw = {
     currency: currencies.ether,
     mainnet: true
   },
+  ropsten: {
+    url: secret.ROPSTEN_NODE_URL,
+    chainId: 3,
+    accounts: acc,
+    currency: currencies.ether,
+    mainnet: false
+  },
   rinkeby: {
     url: secret.RINKEBY_NODE_URL,
     chainId: 4,

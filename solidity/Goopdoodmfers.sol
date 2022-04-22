@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1
-// Chiru Labs ERC721 v3.1.0
+// Chiru Labs ERC721 v3.2.0
 
 /****************************************************************************
     goopdoodmfers
 
-    8000 Supply
+    8008 Supply
 
     Written by Oliver Straszynski
     https://github.com/broliver12/
@@ -32,20 +32,30 @@ contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
     uint256 public maxMintsWhitelist = 2;
     uint256 public maxMints = 20;
     // Price
-    uint256 public price = 0.01 ether;
+    uint256 public price = 0.018 ether;
     // Collection Size
-    // Set to 8000 on ln. 48
+    // Set to 8008 on ln. 58
     uint256 public immutable collectionSize;
-    // Supply for devs (< 0.1% of total)
-    uint256 private remainingDevSupply = 7;
+    // Supply for devs
+    uint256 private remainingDevSupply = 14;
     uint256 public immutable devSupply;
     // Map of wallets => slot counts
     mapping(address => uint256) public whitelist;
+    mapping(address => uint256) public freeMintsUsed;
+
+    // Goopdoods contract
+    address private allowedAddress = 0x2dfF22dcb59D6729Ed543188033CE102f14eF0d1;
+    IERC721 goopdoods = IERC721(allowedAddress);
+    // Ability to change address
+    function setAllowedAddress(address _addr) external onlyOwner {
+        allowedAddress = _addr;
+        goopdoods = IERC721(_addr);
+    }
 
     // Constructor
     constructor() ERC721A("goopdoodmfers", "goopdoodmfers") {
         // Set collection size
-        collectionSize = 8000;
+        collectionSize = 8008;
         // Make dev supply public & immutable
         devSupply = remainingDevSupply;
     }
@@ -73,11 +83,10 @@ contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
         enoughSupply(quantity)
     {
         require(whitelistEnabled, "Whitelist sale not enabled");
-        require(msg.value >= quantity * price, "Not enough ETH");
         require(whitelist[msg.sender] >= quantity, "No whitelist mints left");
+        discount(quantity);
         whitelist[msg.sender] = whitelist[msg.sender] - quantity;
         _safeMint(msg.sender, quantity);
-        refundIfOver(quantity * price);
     }
 
     // Mint function for public sale
@@ -88,14 +97,34 @@ contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
         enoughSupply(quantity)
     {
         require(mintEnabled, "Minting not enabled");
-        require(quantity <= maxMints, "Illegal quantity");
         require(
             numberMinted(msg.sender) + quantity <= maxMints,
             "Cant mint that many"
         );
-        require(msg.value >= quantity * price, "Not enough ETH");
+        discount(quantity);
         _safeMint(msg.sender, quantity);
-        refundIfOver(quantity * price);
+    }
+
+    // 1 goop == 1 gdmfer
+    function discount(uint256 quantity) private {
+        uint256 balance = goopdoods.balanceOf(msg.sender);
+        if(balance > 0){
+           uint256 freeMintsAvailable = balance - freeMintsUsed[msg.sender];
+           if(quantity >= freeMintsAvailable){
+             freeMintsUsed[msg.sender] += freeMintsAvailable;
+             // If you've got some free mints, you'll pay partial price
+             require(msg.value >= (quantity - freeMintsAvailable) * price, "Not enough ETH");
+             refundIfOver((quantity - freeMintsAvailable) * price);
+           } else {
+             freeMintsUsed[msg.sender] += quantity;
+             // If you've got enough free mints, all eth paid is refunded.
+             refundIfOver(0);
+           }
+        } else {
+          // If you're not a goop owner, you pay full price
+          require(msg.value >= quantity * price, "Not enough ETH");
+          refundIfOver(quantity * price);
+        }
     }
 
     // Mint function for developers (owner)
@@ -104,7 +133,7 @@ contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
         onlyOwner
         enoughSupply(quantity)
     {
-        require(remainingDevSupply - quantity >= 0, "Not enough dev supply");
+        require(quantity <= remainingDevSupply, "Not enough dev supply");
         require(quantity <= maxMints, "Illegal quantity");
         remainingDevSupply = remainingDevSupply - quantity;
         _safeMint(recipient, quantity);
@@ -248,7 +277,7 @@ contract Goopdoodmfers is ERC721A, Ownable, ReentrancyGuard {
             }
         }
 
-        // Cant get to this line, because math
+        // Cant get to this line, because maths
         revert();
     }
 }
