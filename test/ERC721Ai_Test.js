@@ -7,7 +7,7 @@ const fs = require('fs')
 
 describe('', () => {
     // Set these to the contract's name, and path relative to [basePath]
-    const CONTRACT_NAME = 'Goopdoodmfers'
+    const CONTRACT_NAME = 'ERC721A_mint'
     const CONTRACT_PATH = 'mock'
     let factory, contract, owner, addr1, addr2
     let addrs

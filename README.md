@@ -1,11 +1,28 @@
 # GOOPDOODMFERS
 
 Solidity code for goopdoodmfers NFT collection.
-
-Fan Art, not affiliated with goopdoods or mfers.
+8008 goopdoodmfers.
 
 Permission to create derivative collection granted by creators
 of both goopdoods & mfers, April 2022.
+
+Fan Art, not affiliated with goopdoods or mfers.
+
+## View Contract on the Ethereum Mainnet
+
+- [Etherscan](https://etherscan.io/address/0xefb6bcdad3af3b0eb6ea5d7f915736b777cce369)
+- [Looksrare](https://looksrare.org/collections/0xEfB6BcDad3aF3B0eb6eA5D7F915736B777cCE369)
+
+## Independent Audit
+
+- Auditor: [@ovosontop](https://twitter.com/ovosontop) aka ovos.eth
+- Audit Result: __SAFE__
+- [Click to see full audit result & contract breakdown](https://gateway.pinata.cloud/ipfs/QmPtbsbky7GD3aaPRmqC4yxW7i6nmEgBor9wcfwzMKBNUn)
+
+TLDR:
+
+>_"My initial thoughts of the contract are superb, the developer has demonstrated_
+>_a clear understanding and implementation of the ERC721A contract."_
 
 ## Usage
 
@@ -46,6 +63,6 @@ Email: oliver.strasz@gmail.com
 
 ## License
 
-UNLICENSED
+__MIT__
 
-DO NOT USE OR REPRODUCE WITHOUT AUTHORIZATION
+_Happy Hacking_
