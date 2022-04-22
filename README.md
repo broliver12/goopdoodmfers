@@ -14,9 +14,9 @@ of both goopdoods & mfers, 2022.
 
 ## Independent Audit
 
-Auditor: [@ovosontop](https://twitter.com/ovosontop) aka ovos.eth
-Audit Result: __SAFE__
-[Click to see full audit result & contract breakdown](https://gateway.pinata.cloud/ipfs/QmPtbsbky7GD3aaPRmqC4yxW7i6nmEgBor9wcfwzMKBNUn)
+- Auditor: [@ovosontop](https://twitter.com/ovosontop) aka ovos.eth
+- Audit Result: __SAFE__
+- [Click to see full audit result & contract breakdown](https://gateway.pinata.cloud/ipfs/QmPtbsbky7GD3aaPRmqC4yxW7i6nmEgBor9wcfwzMKBNUn)
 
 TLDR:
 
