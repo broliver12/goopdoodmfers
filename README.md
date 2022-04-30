@@ -3,8 +3,8 @@
 Solidity code for goopdoodmfers NFT collection.
 8008 goopdoodmfers.
 
-Fan Art, NOT affiliated or endorsed by goopdoods or mfers.
-All art drawn by hand.
+NOT affiliated with, or endorsed by `goopdoods` OR `mfers`.
+Fan Art, all layers hand drawn.
 
 ## View Contract on the Ethereum Mainnet
 
