@@ -3,10 +3,8 @@
 Solidity code for goopdoodmfers NFT collection.
 8008 goopdoodmfers.
 
-Permission to create derivative collection granted by creators
-of both goopdoods & mfers, April 2022.
-
-Fan Art, not affiliated with goopdoods or mfers.
+Fan Art, NOT affiliated or endorsed by goopdoods or mfers.
+All art drawn by hand.
 
 ## View Contract on the Ethereum Mainnet
 
